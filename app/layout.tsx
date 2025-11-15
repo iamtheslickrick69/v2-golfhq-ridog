@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/react";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "GolfHQ - AI-Powered Golf Digital Country Club",
-  description: "The #1 golf marketplace with Riley B as your AI caddy. Track rounds, review courses, compete in leagues, and improve your game.",
+  title: "GolfHQ.ai - Your AI Golf Caddy",
+  description: "The operating system for golf - Riley B guides you through every aspect of your golf journey",
 };
 
 export default function RootLayout({
@@ -16,7 +17,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={`${inter.variable} font-sans antialiased`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

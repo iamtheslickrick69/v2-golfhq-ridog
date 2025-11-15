@@ -1,117 +1,201 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { pageTransition, pageTransitionSettings } from "@/lib/animations";
-import { Users, Trophy, Calendar, MessageSquare } from "lucide-react";
+import { Users, Trophy, Calendar, Target } from "lucide-react";
+import { pageTransition, staggerContainer, staggerItem } from "@/lib/animations/presets";
+import { Card, Badge, Button } from "@/components/ui";
+import { activeCompetitions } from "@/lib/mock-data/competitions-data";
+import { Competition } from "@/lib/mock-data/types";
 
 export default function CommunityPage() {
-  const competitions = [
-    {
-      id: 1,
-      name: "Utah Desert Challenge",
-      description: "Play all 3 desert courses in November",
-      participants: 234,
-      status: "active",
-      progress: "2/3 courses"
-    },
-    {
-      id: 2,
-      name: "Turkey Trot Scramble",
-      description: "Thanksgiving weekend best ball tournament",
-      participants: 48,
-      status: "upcoming",
-      date: "Nov 28, 2024"
-    },
-  ];
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const forums = [
-    { title: "Equipment Reviews", posts: 1234, category: "gear" },
-    { title: "Course Conditions", posts: 892, category: "courses" },
-    { title: "Swing Help", posts: 2341, category: "improvement" },
-    { title: "Local Meetups", posts: 456, category: "social" },
-  ];
+  useEffect(() => {
+    setTimeout(() => {
+      setCompetitions(activeCompetitions);
+      setLoading(false);
+    }, 500);
+  }, []);
+
+  const getStatusBadge = (status: string) => {
+    if (status === "active") return <Badge variant="success">Active</Badge>;
+    if (status === "upcoming") return <Badge variant="info">Upcoming</Badge>;
+    return <Badge variant="default">Completed</Badge>;
+  };
+
+  const getTypeIcon = (type: string) => {
+    if (type === "tournament") return <Trophy className="w-5 h-5" />;
+    if (type === "league") return <Users className="w-5 h-5" />;
+    return <Target className="w-5 h-5" />;
+  };
 
   return (
     <motion.div
+      className="min-h-screen bg-gradient-soft p-4 md:p-8"
+      variants={pageTransition}
       initial="initial"
       animate="animate"
-      variants={pageTransition}
-      transition={pageTransitionSettings}
-      className="min-h-screen bg-gradient-to-br from-white via-bg-secondary to-bg-tertiary"
     >
-      <div className="container mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Stymie League 🏌️</h1>
-          <p className="text-gray-600">Community competitions and tournaments</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+            Stymie League
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Compete in tournaments, join leagues, and find playing partners
+          </p>
         </div>
 
-        {/* Active Competitions */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Active Competitions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card>
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <Users className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">1,247</div>
+                <div className="text-sm text-gray-600">Active Members</div>
+              </div>
+            </div>
+          </Card>
+          <Card>
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-green-100 rounded-xl">
+                <Trophy className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">23</div>
+                <div className="text-sm text-gray-600">Active Competitions</div>
+              </div>
+            </div>
+          </Card>
+          <Card>
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-purple-100 rounded-xl">
+                <Calendar className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">12</div>
+                <div className="text-sm text-gray-600">Events This Month</div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Competitions */}
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          Competitions & Events
+        </h2>
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="glass-card h-32 skeleton" />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            className="space-y-4"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="show"
+          >
             {competitions.map((comp) => (
-              <Card key={comp.id} hoverable>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Trophy className="w-5 h-5 text-golf-green" />
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        comp.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {comp.status}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">{comp.name}</h3>
-                    <p className="text-gray-600 text-sm mb-3">{comp.description}</p>
-                    <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <Users className="w-4 h-4 mr-1" />
-                        {comp.participants} participants
+              <motion.div key={comp.id} variants={staggerItem}>
+                <Card hover className="cursor-pointer">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-golf-green-pale rounded-xl text-golf-green">
+                        {getTypeIcon(comp.type)}
                       </div>
-                      {comp.date && (
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {comp.date}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {comp.name}
+                          </h3>
+                          {getStatusBadge(comp.status)}
                         </div>
-                      )}
-                    </div>
-                    {comp.progress && (
-                      <div className="mt-3 text-sm">
-                        <span className="font-medium text-golf-green">Your progress: {comp.progress}</span>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {comp.description}
+                        </p>
+                        {comp.date && (
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <Calendar className="w-4 h-4" />
+                            {comp.date}
+                          </div>
+                        )}
+                        {comp.startDate && comp.endDate && (
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <Calendar className="w-4 h-4" />
+                            {comp.startDate} - {comp.endDate}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </div>
-                <Button className="w-full mt-4">
-                  {comp.status === 'active' ? 'View Details' : 'Register'}
-                </Button>
-              </Card>
-            ))}
-          </div>
-        </div>
+                    </div>
 
-        {/* Forums */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Community Forums</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {forums.map((forum, i) => (
-              <Card key={i} hoverable>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <MessageSquare className="w-6 h-6 text-golf-green" />
-                    <div>
-                      <h4 className="font-semibold">{forum.title}</h4>
-                      <p className="text-sm text-gray-600">{forum.posts.toLocaleString()} posts</p>
+                    <div className="flex flex-col items-end gap-2">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-golf-green">
+                          {comp.participants}
+                        </div>
+                        <div className="text-sm text-gray-600">Participants</div>
+                      </div>
+                      {comp.status === "active" || comp.status === "upcoming" ? (
+                        <Button size="sm">Join</Button>
+                      ) : null}
                     </div>
                   </div>
-                  <span className="text-golf-green">→</span>
-                </div>
-              </Card>
+
+                  {/* Requirements or Prizes */}
+                  {comp.requirements && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="text-sm font-semibold text-gray-700 mb-2">
+                        Requirements:
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {comp.requirements.map((req, i) => (
+                          <Badge key={i} variant="default">
+                            {req}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {comp.prizes && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="text-sm font-semibold text-gray-700 mb-2">
+                        Prizes:
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        {comp.prizes.first && (
+                          <div>
+                            <div className="text-gray-600">1st Place</div>
+                            <div className="font-semibold">{comp.prizes.first}</div>
+                          </div>
+                        )}
+                        {comp.prizes.second && (
+                          <div>
+                            <div className="text-gray-600">2nd Place</div>
+                            <div className="font-semibold">{comp.prizes.second}</div>
+                          </div>
+                        )}
+                        {comp.prizes.third && (
+                          <div>
+                            <div className="text-gray-600">3rd Place</div>
+                            <div className="font-semibold">{comp.prizes.third}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              </motion.div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

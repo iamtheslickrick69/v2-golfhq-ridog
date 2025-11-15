@@ -9,33 +9,37 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        golf: {
-          green: "#22C55E",
-          "green-dark": "#16A34A",
-          "green-light": "#86EFAC",
-          "green-pale": "#DCFCE7",
+        'golf-green': {
+          DEFAULT: '#22C55E',
+          dark: '#16A34A',
+          light: '#86EFAC',
+          pale: '#DCFCE7',
         },
-        bg: {
-          primary: "#FFFFFF",
-          secondary: "#F8F7F4",
-          tertiary: "#F3F2EF",
-        },
+      },
+      backgroundImage: {
+        'gradient-soft': 'linear-gradient(135deg, #FFFFFF 0%, #F8F7F4 100%)',
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["SF Pro Display", "Inter", "sans-serif"],
+        sans: ['var(--font-inter)', 'Inter', 'sans-serif'],
       },
-      animation: {
-        "float": "float 6s ease-in-out infinite",
+      spacing: {
+        '1': '0.5rem',
+        '2': '1rem',
+        '3': '1.5rem',
+        '4': '2rem',
+        '5': '2.5rem',
+        '6': '3rem',
+        '8': '4rem',
+        '10': '5rem',
+        '12': '6rem',
       },
-      keyframes: {
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-20px)" },
-        },
+      boxShadow: {
+        'card': '0 1px 3px rgba(0, 0, 0, 0.05)',
+        'card-hover': '0 10px 40px rgba(0, 0, 0, 0.08)',
       },
     },
   },
   plugins: [],
 };
+
 export default config;

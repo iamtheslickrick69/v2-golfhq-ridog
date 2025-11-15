@@ -1,133 +1,159 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Card } from "@/components/ui/Card";
-import { ProgressBar } from "@/components/ui/ProgressBar";
-import { pageTransition, pageTransitionSettings } from "@/lib/animations";
-import { currentUser, trophyBalls } from "@/lib/mock-data";
-import { Trophy, Award, TrendingUp, Target } from "lucide-react";
+import { Trophy, Star, TrendingUp, Award } from "lucide-react";
+import { pageTransition, trophyEarned } from "@/lib/animations/presets";
+import { Card, ProgressBar, Badge } from "@/components/ui";
+import { useUserStore } from "@/lib/stores/userStore";
 
 export default function TourCardPage() {
+  const { user } = useUserStore();
+
   const levels = [
-    { name: 'Bronze', xp: 0, color: 'bg-orange-300' },
-    { name: 'Silver', xp: 2500, color: 'bg-gray-300' },
-    { name: 'Gold', xp: 5000, color: 'bg-yellow-300' },
-    { name: 'Platinum', xp: 10000, color: 'bg-purple-300' },
-    { name: 'Black Card', xp: 25000, color: 'bg-black' },
+    { name: "Bronze", xp: 0, color: "bg-orange-400" },
+    { name: "Silver", xp: 2500, color: "bg-gray-400" },
+    { name: "Gold", xp: 5000, color: "bg-yellow-400" },
+    { name: "Platinum", xp: 10000, color: "bg-blue-400" },
+    { name: "Black Card", xp: 25000, color: "bg-black" },
   ];
 
-  const earnedTrophies = trophyBalls.filter(t => t.earned);
-  const availableTrophies = trophyBalls.filter(t => !t.earned);
+  const earnedBalls = user.achievements.trophyBalls.filter((ball) => ball.earned);
+  const unearnedBalls = user.achievements.trophyBalls.filter((ball) => !ball.earned);
 
   return (
     <motion.div
+      className="min-h-screen bg-gradient-soft p-4 md:p-8"
+      variants={pageTransition}
       initial="initial"
       animate="animate"
-      variants={pageTransition}
-      transition={pageTransitionSettings}
-      className="min-h-screen bg-gradient-to-br from-white via-bg-secondary to-bg-tertiary"
     >
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8">Tour Card 🏆</h1>
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+            Tour Card
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Level up and unlock exclusive perks
+          </p>
+        </div>
 
-        {/* Current Status */}
-        <Card className="mb-8 bg-gradient-to-br from-yellow-50 to-white">
-          <div className="flex items-center justify-between mb-6">
+        {/* Current Level Card */}
+        <Card className="mb-8 bg-gradient-to-br from-yellow-400 to-yellow-600 text-white">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <h2 className="text-3xl font-bold">{currentUser.tourCard.level} Member</h2>
-              <p className="text-gray-600">Rank #{currentUser.tourCard.rank} • {currentUser.tourCard.memberNumber}</p>
+              <div className="text-sm font-semibold uppercase mb-2">
+                Current Level
+              </div>
+              <div className="text-4xl font-bold mb-2">
+                {user.tourCard.level}
+              </div>
+              <div className="text-sm opacity-90">
+                Member #{user.tourCard.memberNumber}
+              </div>
+              <div className="text-sm opacity-90 mt-1">
+                Rank #{user.tourCard.rank} globally
+              </div>
             </div>
-            <Award className="w-16 h-16 text-yellow-500" />
+            <div className="flex-1 max-w-md">
+              <div className="flex justify-between text-sm mb-2">
+                <span>{user.tourCard.xp} XP</span>
+                <span>{user.tourCard.nextLevelXp} XP</span>
+              </div>
+              <ProgressBar
+                value={user.tourCard.xp}
+                max={user.tourCard.nextLevelXp}
+                barColor="bg-white"
+                className="mb-2"
+              />
+              <div className="text-sm opacity-90">
+                {user.tourCard.nextLevelXp - user.tourCard.xp} XP to next level
+              </div>
+            </div>
           </div>
-          <ProgressBar
-            current={currentUser.tourCard.xp}
-            max={currentUser.tourCard.nextLevelXp}
-          />
         </Card>
 
-        {/* Level Progression */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Level Progression</h2>
-          <div className="space-y-3">
-            {levels.map((level, i) => {
-              const isUnlocked = currentUser.tourCard.xp >= level.xp;
-              const isCurrent = currentUser.tourCard.level === level.name;
-
-              return (
-                <Card key={level.name} className={isCurrent ? 'ring-2 ring-golf-green' : ''}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-12 h-12 ${level.color} rounded-full flex items-center justify-center`}>
-                        {isUnlocked ? (
-                          <Trophy className="w-6 h-6 text-white" />
-                        ) : (
-                          <span className="text-white font-bold">{i + 1}</span>
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{level.name}</h3>
-                        <p className="text-sm text-gray-600">
-                          {level.xp.toLocaleString()} XP required
-                        </p>
-                      </div>
-                    </div>
-                    {isCurrent && (
-                      <span className="px-3 py-1 bg-golf-green text-white rounded-full text-sm font-medium">
-                        Current
-                      </span>
-                    )}
-                    {isUnlocked && !isCurrent && (
-                      <span className="text-golf-green font-medium">✓ Unlocked</span>
-                    )}
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+        {/* Levels Overview */}
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">All Levels</h2>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+          {levels.map((level, index) => (
+            <Card
+              key={level.name}
+              className={`text-center ${
+                user.tourCard.level === level.name
+                  ? "ring-2 ring-golf-green"
+                  : ""
+              }`}
+            >
+              <div
+                className={`w-16 h-16 ${level.color} rounded-full mx-auto mb-3 flex items-center justify-center`}
+              >
+                <Award className="w-8 h-8 text-white" />
+              </div>
+              <div className="font-bold text-gray-900">{level.name}</div>
+              <div className="text-sm text-gray-600">{level.xp}+ XP</div>
+            </Card>
+          ))}
         </div>
 
         {/* Trophy Balls */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Earned Trophy Balls ({earnedTrophies.length})</h2>
-            <div className="space-y-3">
-              {earnedTrophies.map((trophy) => (
-                <Card key={trophy.id} className="bg-gradient-to-r from-golf-green-pale to-white">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-golf-green rounded-full flex items-center justify-center">
-                      <Trophy className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">{trophy.name}</h4>
-                      <p className="text-sm text-gray-600">{trophy.requirement}</p>
-                      {trophy.date && (
-                        <p className="text-xs text-gray-500 mt-1">Earned: {trophy.date}</p>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          Trophy Balls ({earnedBalls.length}/{user.achievements.trophyBalls.length})
+        </h2>
 
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Available Trophy Balls ({availableTrophies.length})</h2>
-            <div className="space-y-3">
-              {availableTrophies.map((trophy) => (
-                <Card key={trophy.id} className="opacity-60">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                      <Target className="w-6 h-6 text-gray-400" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-700">{trophy.name}</h4>
-                      <p className="text-sm text-gray-600">{trophy.requirement}</p>
-                    </div>
+        {/* Earned Trophy Balls */}
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">Earned</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {earnedBalls.map((ball) => (
+            <motion.div
+              key={ball.id}
+              variants={trophyEarned}
+              initial="initial"
+              animate="animate"
+            >
+              <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-400">
+                <div className="flex items-start gap-3">
+                  <div className="p-3 bg-yellow-400 rounded-xl">
+                    <Trophy className="w-6 h-6 text-white" />
                   </div>
-                </Card>
-              ))}
-            </div>
-          </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-900">{ball.name}</h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {ball.description}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Earned: {ball.earnedDate}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Unearned Trophy Balls */}
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          Not Yet Earned
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {unearnedBalls.map((ball) => (
+            <Card key={ball.id} className="opacity-60">
+              <div className="flex items-start gap-3">
+                <div className="p-3 bg-gray-200 rounded-xl">
+                  <Trophy className="w-6 h-6 text-gray-400" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-900">{ball.name}</h4>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {ball.description}
+                  </p>
+                  <div className="mt-2">
+                    <Badge variant="default">{ball.requirement}</Badge>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
       </div>
     </motion.div>

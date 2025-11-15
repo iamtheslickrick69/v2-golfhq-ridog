@@ -1,3 +1,5 @@
+// Type definitions for all mock data
+
 export interface User {
   id: string;
   name: string;
@@ -12,12 +14,12 @@ export interface User {
     memberSince: string;
     handicap: {
       current: number;
-      trend: 'decreasing' | 'stable' | 'increasing';
+      trend: "decreasing" | "stable" | "increasing";
       history: number[];
     };
   };
   tourCard: {
-    level: 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Black Card';
+    level: "Bronze" | "Silver" | "Gold" | "Platinum" | "Black Card";
     xp: number;
     nextLevelXp: number;
     rank: number;
@@ -29,7 +31,7 @@ export interface User {
     averageScore: number;
     bestScore: number;
     coursesPlayed: number;
-    favoriteTime: 'morning' | 'afternoon' | 'twilight';
+    favoriteTime: "morning" | "afternoon" | "twilight";
     playFrequency: string;
   };
   achievements: {
@@ -42,18 +44,19 @@ export interface User {
   };
   preferences: {
     notifications: boolean;
-    rileyTips: string;
+    rileyTips: "daily" | "weekly" | "never";
     courseAlerts: string[];
-    playingPartners: 'open' | 'friends' | 'private';
+    playingPartners: "open" | "friends" | "private";
   };
 }
 
 export interface TrophyBall {
   id: string;
   name: string;
+  description: string;
   requirement: string;
   earned: boolean;
-  date?: string;
+  earnedDate?: string;
   icon?: string;
 }
 
@@ -127,37 +130,65 @@ export interface Round {
   trophyBalls: string[];
 }
 
+export interface RileyResponse {
+  category: string;
+  responses: string[];
+}
+
 export interface Competition {
   id: string;
   name: string;
   description: string;
-  type: 'challenge' | 'tournament' | 'league';
-  status: 'active' | 'upcoming' | 'completed';
+  type: "challenge" | "tournament" | "league";
+  status: "active" | "upcoming" | "completed";
   startDate?: string;
   endDate?: string;
   date?: string;
   course?: string;
   format?: string;
-  entryFee?: number;
   participants: number;
   maxTeams?: number;
+  entryFee?: number;
   requirements?: string[];
-  prizes?: any;
-  rewards?: any;
+  progress?: Record<string, any>;
+  rewards?: {
+    xp?: number;
+    trophyBall?: string;
+    title?: string;
+  };
+  prizes?: {
+    first?: string;
+    second?: string;
+    third?: string;
+  };
+}
+
+export interface Equipment {
+  id: string;
+  category: "Driver" | "Irons" | "Wedges" | "Putter" | "Hybrid" | "Fairway Wood";
+  brand: string;
+  model: string;
+  year: number;
+  purchaseDate: string;
+  rounds: number;
+  stats: Record<string, any>;
+  notes: string;
+  rating: number;
+  images?: string[];
 }
 
 export interface Instructor {
   id: string;
   name: string;
   title: string;
-  certification?: string;
+  certification: string;
   specialties: string[];
   experience: string;
   rating: number;
   reviews: number;
   hourlyRate: number;
-  packageRates?: { [key: string]: number };
-  availability: { [key: string]: string[] };
+  packageRates: Record<string, number>;
+  availability: Record<string, string[]>;
   bio: string;
   location: string;
   images?: string[];

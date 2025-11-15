@@ -1,125 +1,158 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { pageTransition, pageTransitionSettings } from "@/lib/animations";
-import { MessageSquare, BookOpen, Target, Zap, Trophy } from "lucide-react";
-import { getRileyGreeting, getRileyTip } from "@/lib/mock-data";
-import { getTimeOfDay } from "@/lib/utils";
+import { Send } from "lucide-react";
+import { pageTransition } from "@/lib/animations/presets";
+import { useRileyStore } from "@/lib/stores/rileyStore";
+import { RileyMessage } from "@/components/riley/RileyMessage";
+import { RileyTypingIndicator } from "@/components/riley/RileyTypingIndicator";
+import { RileyQuickReplies } from "@/components/riley/RileyQuickReplies";
+import { Input, Button } from "@/components/ui";
+import { rileyQuickReplies, getRileyTip, rileyLessons } from "@/lib/mock-data/riley-responses";
 
 export default function MyCaddyPage() {
-  const [messages, setMessages] = useState<Array<{ role: 'riley' | 'user', content: string }>>([
-    { role: 'riley', content: getRileyGreeting(getTimeOfDay()) }
-  ]);
-  const [input, setInput] = useState('');
+  const { messages, isTyping, addMessage, setTyping } = useRileyStore();
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
-
-    setMessages([...messages, { role: 'user', content: input }]);
-    setInput('');
-
-    // Simulate Riley's response
-    setTimeout(() => {
-      const response = getRileyTip('driving');
-      setMessages(prev => [...prev, { role: 'riley', content: response }]);
-    }, 1000);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const lessons = [
-    { title: "Fix Your Slice", duration: "12 min", difficulty: "Beginner" },
-    { title: "Putting Basics", duration: "8 min", difficulty: "Beginner" },
-    { title: "Bunker Play Mastery", duration: "15 min", difficulty: "Intermediate" },
-    { title: "Course Management 101", duration: "20 min", difficulty: "Advanced" },
-  ];
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const userMessage = input;
+    setInput("");
+    addMessage("user", userMessage);
+
+    // Simulate Riley typing
+    setTyping(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    // Get a contextual response
+    let rileyResponse = await getRileyTip();
+
+    // Simple keyword-based responses for demo
+    const lowerMessage = userMessage.toLowerCase();
+    if (lowerMessage.includes("handicap")) {
+      rileyResponse =
+        "Your handicap is trending down! You're at 8.2 right now, and based on your recent rounds, you're on track to hit single digits by spring. Keep up the great work!";
+    } else if (lowerMessage.includes("round") || lowerMessage.includes("recent")) {
+      rileyResponse =
+        "Your last round at Fox Hollow was solid - 78! You had 3 birdies and your driving was money. Only 2 penalties, which is great. Want me to break down your stats?";
+    } else if (lowerMessage.includes("tee time") || lowerMessage.includes("book")) {
+      rileyResponse =
+        "Perfect timing! Fox Hollow has slots open tomorrow morning at 7:30 and 8:00. Black Desert has afternoon times at 2:00. What sounds good?";
+    } else if (lowerMessage.includes("drill") || lowerMessage.includes("practice")) {
+      rileyResponse =
+        "Let's work on your putting! Here's a great drill: Set up 5 balls at 3 feet from the hole in a circle. Make all 5 in a row before moving back to 5 feet. This builds confidence on those short putts.";
+    } else if (lowerMessage.includes("slice")) {
+      rileyResponse =
+        "Let's fix that slice! Check out my 'Fix Your Slice in 3 Steps' lesson. The main thing: strengthen your grip slightly and make sure you're not cutting across the ball. Want me to break down the full drill?";
+    } else if (lowerMessage.includes("course") || lowerMessage.includes("recommend")) {
+      rileyResponse =
+        "Based on your recent play, I'd recommend Sand Hollow's Links course this week. It's playing well, conditions are great, and it's a bit more forgiving than the Championship course. Plus, twilight rates are killer right now!";
+    }
+
+    addMessage("riley", rileyResponse);
+    setTyping(false);
+  };
+
+  const handleQuickReply = (option: string) => {
+    addMessage("user", option);
+    setTyping(true);
+
+    setTimeout(async () => {
+      const response = await getRileyTip();
+      addMessage("riley", response);
+      setTyping(false);
+    }, 1500);
+  };
 
   return (
     <motion.div
+      className="min-h-screen bg-gradient-soft flex flex-col"
+      variants={pageTransition}
       initial="initial"
       animate="animate"
-      variants={pageTransition}
-      transition={pageTransitionSettings}
-      className="min-h-screen bg-gradient-to-br from-white via-bg-secondary to-bg-tertiary"
     >
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8">My Caddy - Riley B 🏌️</h1>
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 p-4 md:p-6">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            My Caddy - Riley B
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Your AI golf coach and companion
+          </p>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Chat Interface */}
-          <div className="lg:col-span-2">
-            <Card className="h-[600px] flex flex-col">
-              <div className="flex-1 overflow-y-auto space-y-4 p-4">
-                {messages.map((msg, i) => (
-                  <div
-                    key={i}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                        msg.role === 'user'
-                          ? 'bg-golf-green text-white'
-                          : 'bg-gray-100 text-gray-900'
-                      }`}
-                    >
-                      {msg.content}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="border-t border-gray-200 p-4">
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                    placeholder="Ask Riley anything..."
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-golf-green"
-                  />
-                  <Button onClick={sendMessage}>Send</Button>
-                </div>
-              </div>
-            </Card>
+      {/* Chat Container */}
+      <div className="flex-1 overflow-hidden flex flex-col max-w-4xl w-full mx-auto">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+          {messages.map((message) => (
+            <RileyMessage
+              key={message.id}
+              role={message.role}
+              content={message.content}
+              timestamp={message.timestamp}
+            />
+          ))}
+          {isTyping && <RileyTypingIndicator />}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Quick Replies */}
+        <div className="px-4 md:px-6">
+          <RileyQuickReplies
+            options={rileyQuickReplies.slice(0, 4)}
+            onSelect={handleQuickReply}
+          />
+        </div>
+
+        {/* Input Area */}
+        <div className="border-t border-gray-200 bg-white p-4 md:p-6">
+          <div className="max-w-4xl mx-auto flex gap-3">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Ask Riley anything about golf..."
+              className="flex-1"
+            />
+            <Button onClick={handleSend} className="flex-shrink-0">
+              <Send className="w-5 h-5" />
+            </Button>
           </div>
+        </div>
+      </div>
 
-          {/* Sidebar - Lessons & Content */}
-          <div className="space-y-6">
-            <Card>
-              <h3 className="text-xl font-semibold mb-4">Popular Lessons</h3>
-              <div className="space-y-3">
-                {lessons.map((lesson, i) => (
-                  <div key={i} className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <BookOpen className="w-5 h-5 text-golf-green" />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">{lesson.title}</h4>
-                        <p className="text-xs text-gray-600">{lesson.duration} • {lesson.difficulty}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+      {/* Lessons Preview */}
+      <div className="bg-white border-t border-gray-200 p-4 md:p-6">
+        <div className="max-w-4xl mx-auto">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+            Featured Lessons
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {rileyLessons.slice(0, 3).map((lesson) => (
+              <div
+                key={lesson.id}
+                className="p-4 border border-gray-200 rounded-xl hover:border-golf-green transition-colors duration-200 cursor-pointer"
+              >
+                <h4 className="font-semibold text-gray-900">{lesson.title}</h4>
+                <p className="text-sm text-gray-600 mt-1">
+                  {lesson.duration} • {lesson.difficulty}
+                </p>
               </div>
-            </Card>
-
-            <Card>
-              <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <Button variant="secondary" className="w-full justify-start">
-                  <Target className="w-5 h-5 mr-2" />
-                  Practice Drills
-                </Button>
-                <Button variant="secondary" className="w-full justify-start">
-                  <Zap className="w-5 h-5 mr-2" />
-                  Take Quiz
-                </Button>
-                <Button variant="secondary" className="w-full justify-start">
-                  <Trophy className="w-5 h-5 mr-2" />
-                  View Progress
-                </Button>
-              </div>
-            </Card>
+            ))}
           </div>
         </div>
       </div>

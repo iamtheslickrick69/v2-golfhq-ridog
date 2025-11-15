@@ -1,32 +1,23 @@
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { cardHover } from "@/lib/animations";
+import { motion, HTMLMotionProps } from "framer-motion";
+import { cardHover } from "@/lib/animations/presets";
+import { ReactNode } from "react";
 
-interface CardProps {
-  children: React.ReactNode;
+interface CardProps extends Omit<HTMLMotionProps<"div">, "children"> {
+  children: ReactNode;
+  hover?: boolean;
   className?: string;
-  hoverable?: boolean;
-  onClick?: () => void;
 }
 
-export function Card({ children, className, hoverable = false, onClick }: CardProps) {
-  if (hoverable || onClick) {
-    return (
-      <motion.div
-        variants={cardHover}
-        initial="rest"
-        whileHover="hover"
-        className={cn("card cursor-pointer", className)}
-        onClick={onClick}
-      >
-        {children}
-      </motion.div>
-    );
-  }
-
+export function Card({ children, hover = false, className = "", ...props }: CardProps) {
   return (
-    <div className={cn("card", className)}>
+    <motion.div
+      className={`glass-card p-6 ${className}`}
+      variants={hover ? cardHover : undefined}
+      initial={hover ? "rest" : undefined}
+      whileHover={hover ? "hover" : undefined}
+      {...props}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
