@@ -25,7 +25,7 @@ export function calculateDaysAgo(date: string | Date): string {
 
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return '1 day ago';
-  if (diffDays < 7) return `${diffDays} days ago';
+  if (diffDays < 7) return `${diffDays} days ago`;
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
   if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
   return `${Math.floor(diffDays / 365)} years ago`;

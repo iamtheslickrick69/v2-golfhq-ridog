@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+import { Header } from "@/components/ui/Header";
 
 export const metadata: Metadata = {
   title: "GolfHQ.ai - Your AI Golf Caddy",
@@ -17,8 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
-        {children}
+      <body className="font-sans antialiased">
+        <Header />
+        <main>{children}</main>
         <Analytics />
       </body>
     </html>

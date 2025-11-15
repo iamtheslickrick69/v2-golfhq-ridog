@@ -1,11 +1,14 @@
+"use client";
+
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
   className?: string;
 }
 
-export function LoadingSpinner({ size = "md", className = "" }: LoadingSpinnerProps) {
+export function LoadingSpinner({ size = "md", className }: LoadingSpinnerProps) {
   const sizeStyles = {
     sm: "w-4 h-4 border-2",
     md: "w-8 h-8 border-3",
@@ -14,7 +17,11 @@ export function LoadingSpinner({ size = "md", className = "" }: LoadingSpinnerPr
 
   return (
     <motion.div
-      className={`${sizeStyles[size]} border-golf-green border-t-transparent rounded-full ${className}`}
+      className={cn(
+        sizeStyles[size],
+        "border-golf-green border-t-transparent rounded-full",
+        className
+      )}
       animate={{ rotate: 360 }}
       transition={{
         duration: 1,

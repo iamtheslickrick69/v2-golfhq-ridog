@@ -1,9 +1,11 @@
+"use client";
+
 import { motion } from "framer-motion";
-import { buttonPress } from "@/lib/animations/presets";
-import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import React from "react";
 
 interface ButtonProps {
-  children: ReactNode;
+  children: React.ReactNode;
   onClick?: () => void;
   variant?: "primary" | "secondary" | "ghost";
   size?: "sm" | "md" | "lg";
@@ -17,7 +19,7 @@ export function Button({
   onClick,
   variant = "primary",
   size = "md",
-  className = "",
+  className,
   disabled = false,
   type = "button",
 }: ButtonProps) {
@@ -38,7 +40,7 @@ export function Button({
   return (
     <motion.button
       type={type}
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      className={cn(baseStyles, variantStyles[variant], sizeStyles[size], className)}
       onClick={onClick}
       disabled={disabled}
       whileTap={disabled ? undefined : { scale: 0.95 }}
