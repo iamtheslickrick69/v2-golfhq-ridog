@@ -1,8 +1,8 @@
-import { motion } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { scaleOnTap } from "@/lib/animations";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
   variant?: 'primary' | 'secondary' | 'ghost';
   children: React.ReactNode;
   className?: string;
